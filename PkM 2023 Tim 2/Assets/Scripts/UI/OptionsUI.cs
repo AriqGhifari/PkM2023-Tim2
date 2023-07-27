@@ -9,22 +9,38 @@ public class OptionsUI : MonoBehaviour
 {
     public AudioMixer audioMixer;
     public TMP_Dropdown resolutionDropdown;
+    [SerializeField] private Button resetButton;
+    [SerializeField] public Slider volumeSlider;
 
     private Resolution[] resolutions;
-    
+
+    private void Awake()
+    {
+        // Set the initial value of the volume Slider
+        float currentVolume;
+        audioMixer.GetFloat("volume", out currentVolume);
+        volumeSlider.value = currentVolume;
+    }
+
     private void Start()
     {
-        resolutions = Screen.resolutions;
+        resolutions = new Resolution[]
+        {
+            new Resolution { width = 1920, height = 1080 },
+            new Resolution { width = 1600, height = 900 },
+            new Resolution { width = 1280, height = 720 }
+        };
+
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
         int currentResolutionIndex = 0;
 
         // iteration to determine the current resolution
-        for(int i=0; i<resolutions.Length; i++)
+        for (int i = 0; i < resolutions.Length; i++)
         {
             string option = resolutions[i].width + "x" + resolutions[i].height;
             options.Add(option);
-            if(resolutions[i].width == Screen.currentResolution.width && 
+            if (resolutions[i].width == Screen.currentResolution.width &&
                 resolutions[i].height == Screen.currentResolution.height)
             {
                 currentResolutionIndex = i;
@@ -32,7 +48,14 @@ public class OptionsUI : MonoBehaviour
         }
         resolutionDropdown.AddOptions(options);
         resolutionDropdown.value = currentResolutionIndex;
-        resolutionDropdown.RefreshShownValue(); 
+        resolutionDropdown.RefreshShownValue();
+
+        resetButton.onClick.AddListener(() =>
+        {
+            CollectibleManager.instance.ResetProfile();
+            LevelManager.instance.ResetProfile();
+            SaveManager.instance.ResetData();
+        });
     }
 
     public void setResolution(int resolutionIndex)
@@ -51,4 +74,5 @@ public class OptionsUI : MonoBehaviour
     {
         Screen.fullScreen = isFullscreen;
     }
+
 }
